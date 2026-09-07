@@ -1,1 +1,2582 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BIG BROTHER — Clients Editor V1.0 Fast Sync</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{
+      --nav:#123f70;
+      --nav2:#0d3158;
+      --blue:#1769cf;
+      --blue2:#0d56ae;
+      --bg:#eef3f8;
+      --card:#fff;
+      --line:#d8e2ee;
+      --text:#163354;
+      --muted:#6d7f92;
+      --green:#168652;
+      --greenbg:#e8f7ef;
+      --red:#c73f4a;
+      --redbg:#fff0f1;
+      --amber:#9c6700;
+      --amberbg:#fff6dc;
+      --purple:#6d4acb;
+      --purplebg:#f2edff
+    }
 
+    html,body{min-height:100%}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text)
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+
+    .app{
+      display:grid;
+      grid-template-columns:235px minmax(0,1fr);
+      min-height:100vh
+    }
+
+    .sidebar{
+      background:linear-gradient(180deg,var(--nav),var(--nav2));
+      color:#fff;
+      padding:20px 15px;
+      position:sticky;
+      top:0;
+      height:100vh
+    }
+
+    .brand{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:1.4px;
+      line-height:1.15
+    }
+
+    .brand-sub{
+      font-size:11px;
+      opacity:.82;
+      margin:5px 0 25px
+    }
+
+    .nav-title{
+      font-size:10px;
+      font-weight:800;
+      opacity:.6;
+      margin:18px 8px 7px
+    }
+
+    .nav-item{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:#fff;
+      padding:11px 12px;
+      border-radius:9px;
+      margin:4px 0;
+      font-size:13px;
+      font-weight:700;
+      display:flex;
+      gap:9px;
+      align-items:center;
+      text-align:left
+    }
+
+    .nav-item.active,
+    .nav-item:hover{
+      background:rgba(255,255,255,.14);
+      box-shadow:inset 3px 0 0 #63abff
+    }
+
+    .side-note{
+      position:absolute;
+      left:15px;
+      right:15px;
+      bottom:18px;
+      border-top:1px solid rgba(255,255,255,.14);
+      padding-top:12px;
+      text-align:center;
+      font-size:10px;
+      line-height:1.5;
+      opacity:.75
+    }
+
+    .main{min-width:0}
+
+    .topbar{
+      min-height:70px;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 22px;
+      gap:16px
+    }
+
+    .title h1{
+      margin:0;
+      font-size:24px
+    }
+
+    .title p{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted)
+    }
+
+    .connection{
+      padding:8px 11px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      background:var(--amberbg);
+      color:var(--amber)
+    }
+
+    .connection.ok{
+      background:var(--greenbg);
+      color:var(--green)
+    }
+
+    .connection.bad{
+      background:var(--redbg);
+      color:var(--red)
+    }
+
+    .workspace{
+      padding:16px 18px 35px
+    }
+
+    .page{display:none}
+    .page.active{display:block}
+
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:12px
+    }
+
+    .summary-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:11px;
+      padding:12px;
+      box-shadow:0 6px 18px rgba(18,63,112,.04)
+    }
+
+    .summary-card span{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800
+    }
+
+    .summary-card strong{
+      display:block;
+      margin-top:5px;
+      font-size:19px
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      box-shadow:0 8px 22px rgba(18,63,112,.05);
+      overflow:hidden
+    }
+
+    .card+.card{margin-top:12px}
+
+    .card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:13px 15px;
+      border-bottom:1px solid #e8eef4
+    }
+
+    .card-title{
+      font-size:15px;
+      font-weight:900
+    }
+
+    .card-sub{
+      font-size:10px;
+      color:var(--muted);
+      margin-top:3px
+    }
+
+    .card-body{padding:15px}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:11px
+    }
+
+    .form-grid.four{
+      grid-template-columns:repeat(4,minmax(0,1fr))
+    }
+
+    .field.full{grid-column:1/-1}
+
+    .field label{
+      display:block;
+      font-size:10px;
+      font-weight:900;
+      color:#48627d;
+      margin:0 0 5px
+    }
+
+    .field small{
+      display:block;
+      font-size:9px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.4
+    }
+
+    .field input,
+    .field select,
+    .field textarea,
+    .search{
+      width:100%;
+      border:1px solid #ccd8e5;
+      border-radius:8px;
+      background:#fff;
+      padding:9px 10px;
+      color:var(--text);
+      outline:none
+    }
+
+    .field textarea{
+      min-height:72px;
+      resize:vertical
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus,
+    .search:focus{
+      border-color:#5d9ee8;
+      box-shadow:0 0 0 3px rgba(23,105,207,.08)
+    }
+
+    .field input:disabled{
+      background:#f1f4f7;
+      color:#75879a
+    }
+
+    .btn{
+      border:0;
+      border-radius:8px;
+      padding:9px 12px;
+      font-weight:900
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+      color:#fff
+    }
+
+    .btn.green{
+      background:linear-gradient(135deg,#1a995f,#117445);
+      color:#fff
+    }
+
+    .btn.ghost{
+      background:#f4f8fb;
+      color:#345879;
+      border:1px solid var(--line)
+    }
+
+    .btn.red{
+      background:var(--redbg);
+      color:var(--red);
+      border:1px solid #f3b9bf
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed
+    }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:14px
+    }
+
+    .info{
+      padding:10px 11px;
+      border-radius:9px;
+      font-size:10px;
+      line-height:1.45
+    }
+
+    .info.blue{
+      background:#eef7ff;
+      border:1px solid #cce3fb;
+      color:#315f8f
+    }
+
+    .info.amber{
+      background:var(--amberbg);
+      border:1px solid #ecd48b;
+      color:#725311
+    }
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:minmax(220px,1fr) 180px 180px auto;
+      gap:8px;
+      padding:13px 15px;
+      border-bottom:1px solid var(--line)
+    }
+
+    .table-wrap{overflow:auto}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+      min-width:850px
+    }
+
+    th{
+      background:#f1f5f9;
+      color:#405a76;
+      text-align:left;
+      padding:9px;
+      border-bottom:1px solid var(--line);
+      white-space:nowrap
+    }
+
+    td{
+      padding:9px;
+      border-bottom:1px solid #edf1f5;
+      vertical-align:middle
+    }
+
+    tr:hover td{background:#fafcfe}
+
+    .empty{
+      padding:28px!important;
+      text-align:center;
+      color:var(--muted)
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:9px;
+      font-weight:900
+    }
+
+    .badge.green{
+      background:var(--greenbg);
+      color:var(--green)
+    }
+
+    .badge.red{
+      background:var(--redbg);
+      color:var(--red)
+    }
+
+    .badge.blue{
+      background:#eaf3ff;
+      color:var(--blue)
+    }
+
+    .badge.purple{
+      background:var(--purplebg);
+      color:var(--purple)
+    }
+
+    .row-btn{
+      padding:6px 9px;
+      border-radius:7px;
+      border:1px solid #cbd9e7;
+      background:#fff;
+      color:var(--blue);
+      font-weight:900
+    }
+
+    .section{
+      padding:15px;
+      border-bottom:1px solid #e8eef4
+    }
+
+    .section:last-child{border-bottom:0}
+
+    .section-title{
+      font-size:13px;
+      font-weight:900;
+      margin:0 0 11px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px
+    }
+
+    .product-table{min-width:900px}
+
+    .product-table input[type="number"]{
+      width:125px;
+      padding:7px;
+      border:1px solid #ccd8e5;
+      border-radius:7px
+    }
+
+    .product-table select{
+      padding:7px;
+      border:1px solid #ccd8e5;
+      border-radius:7px;
+      background:#fff
+    }
+
+    .product-table tr.unlinked td{
+      background:#f8fafc;
+      color:#75879a
+    }
+
+    .product-table tr.dirty td{
+      background:#fffaf0
+    }
+
+    .switch{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-weight:800
+    }
+
+    .switch input{
+      width:16px;
+      height:16px
+    }
+
+    .loading{
+      position:fixed;
+      inset:0;
+      background:rgba(238,243,248,.72);
+      z-index:900;
+      display:flex;
+      align-items:center;
+      justify-content:center
+    }
+
+    .loader{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:17px 22px;
+      font-weight:900;
+      box-shadow:0 14px 40px rgba(10,40,70,.16)
+    }
+
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:1000;
+      max-width:390px;
+      padding:12px 15px;
+      border-radius:9px;
+      background:#173c32;
+      color:#fff;
+      font-size:12px;
+      font-weight:800;
+      box-shadow:0 12px 35px rgba(0,0,0,.2);
+      display:none
+    }
+
+    .toast.show{display:block}
+    .toast.error{background:#98343d}
+
+    body.shell-embedded .app{
+      display:block;
+      min-height:100vh
+    }
+
+    body.shell-embedded .sidebar{
+      display:none!important
+    }
+
+    body.shell-embedded .main{
+      width:100%;
+      min-width:0
+    }
+
+    @media(max-width:1050px){
+      .app{grid-template-columns:76px minmax(0,1fr)}
+      .brand{font-size:13px}
+      .brand-sub,.nav-title,.nav-item span,.side-note{display:none}
+      .nav-item{justify-content:center;font-size:19px}
+      .form-grid.four{grid-template-columns:1fr 1fr}
+      .toolbar{grid-template-columns:1fr 1fr}
+      .toolbar .search-main{grid-column:1/-1}
+    }
+
+    @media(max-width:700px){
+      .app{display:block}
+      .sidebar{
+        position:static;
+        height:auto;
+        display:flex;
+        align-items:center;
+        gap:6px;
+        padding:9px
+      }
+      .brand{width:60px}
+      .nav-title,.brand-sub,.side-note{display:none}
+      .nav-item{
+        width:auto;
+        flex:1;
+        margin:0;
+        font-size:11px;
+        justify-content:center
+      }
+      .nav-item span{display:inline}
+      .topbar{padding:10px 12px}
+      .title h1{font-size:19px}
+      .workspace{padding:9px}
+      .summary{grid-template-columns:1fr 1fr}
+      .form-grid,.form-grid.four,.toolbar{grid-template-columns:1fr}
+      .toolbar .search-main{grid-column:auto}
+      .actions{flex-wrap:wrap}
+      .actions .btn{flex:1}
+    }
+  </style>
+</head>
+
+<body>
+<div class="loading" id="loading">
+  <div class="loader" id="loadingText">
+    Connecting to Master Database…
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">BIG<br>BROTHER</div>
+    <div class="brand-sub">Clients Editor</div>
+
+    <div class="nav-title">PURCHASE CLIENTS</div>
+
+    <button class="nav-item active" data-page="add">
+      ＋ <span>Add Client</span>
+    </button>
+
+    <button class="nav-item" data-page="details">
+      🏢 <span>All Clients Details</span>
+    </button>
+
+    <div class="side-note">
+      Purchase Clients/Suppliers, linked products and purchase prices
+      are managed from the BIG BROTHER Master Database.
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="title">
+        <h1 id="pageTitle">Add Client</h1>
+        <p id="pageSubtitle">
+          Create a Purchase Client / Supplier.
+        </p>
+      </div>
+      <div class="connection" id="connection">
+        Connecting…
+      </div>
+    </header>
+
+    <div class="workspace">
+
+      <!-- ==================================================
+           ADD CLIENT
+           ================================================== -->
+      <section class="page active" id="page-add">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">＋ New Client / Supplier</div>
+              <div class="card-sub">
+                A permanent CLI-0001 Client ID is generated automatically.
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <form id="addForm">
+              <div class="form-grid four">
+
+                <div class="field">
+                  <label>Client ID</label>
+                  <input value="Automatic" disabled>
+                  <small>Generated by Master Database.</small>
+                </div>
+
+                <div class="field">
+                  <label>Client Name *</label>
+                  <input id="aClientName" required>
+                </div>
+
+                <div class="field">
+                  <label>Client Code *</label>
+                  <input id="aClientCode" required placeholder="Example: KIRISU">
+                </div>
+
+                <div class="field">
+                  <label>Contact Person</label>
+                  <input id="aContactPerson">
+                </div>
+
+                <div class="field">
+                  <label>Phone Number</label>
+                  <input id="aPhoneNumber">
+                </div>
+
+                <div class="field">
+                  <label>Tax / VAT No.</label>
+                  <input id="aTaxVatNo">
+                </div>
+
+                <div class="field">
+                  <label>Payment Term</label>
+                  <input id="aPaymentTerm" placeholder="Example: 30 Days">
+                </div>
+
+                <div class="field">
+                  <label>Currency</label>
+                  <select id="aCurrency">
+                    <option value="USD">USD</option>
+                    <option value="KHR">KHR</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Status</label>
+                  <select id="aStatus">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div class="field full">
+                  <label>Address</label>
+                  <textarea id="aAddress"></textarea>
+                </div>
+
+                <div class="field full">
+                  <label>Note</label>
+                  <textarea id="aNote"></textarea>
+                </div>
+
+              </div>
+
+              <div class="info blue" style="margin-top:12px">
+                After saving the client, open <strong>All Clients Details</strong>
+                to choose which Master Products this supplier sells and set each
+                Purchase Price.
+              </div>
+
+              <div class="actions">
+                <button
+                  type="button"
+                  class="btn ghost"
+                  onclick="resetAddForm()"
+                >
+                  Clear
+                </button>
+
+                <button class="btn green" id="addSaveBtn">
+                  Save New Client
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================
+           ALL CLIENTS DETAILS
+           ================================================== -->
+      <section class="page" id="page-details">
+
+        <div class="summary">
+          <div class="summary-card">
+            <span>TOTAL CLIENTS</span>
+            <strong id="totalClients">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>ACTIVE</span>
+            <strong id="activeClients">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>INACTIVE</span>
+            <strong id="inactiveClients">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <span>MASTER PRODUCTS</span>
+            <strong id="masterProducts">0</strong>
+          </div>
+        </div>
+
+        <div class="card" id="clientListCard">
+          <div class="card-head">
+            <div>
+              <div class="card-title">All Clients Details</div>
+              <div class="card-sub">
+                Select Manage to edit Client information, Products and Purchase Prices.
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn ghost"
+              onclick="loadApp(true)"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <input
+              class="search search-main"
+              id="clientSearch"
+              placeholder="Search name, ID, code, phone or address…"
+              oninput="renderClientTable()"
+            >
+
+            <select
+              class="search"
+              id="clientCurrencyFilter"
+              onchange="renderClientTable()"
+            >
+              <option value="">All currencies</option>
+              <option value="USD">USD</option>
+              <option value="KHR">KHR</option>
+            </select>
+
+            <select
+              class="search"
+              id="clientStatusFilter"
+              onchange="renderClientTable()"
+            >
+              <option value="">All statuses</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+
+            <button
+              type="button"
+              class="btn ghost"
+              onclick="clearFilters()"
+            >
+              Clear Filters
+            </button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client ID</th>
+                  <th>Client Code</th>
+                  <th>Client Name</th>
+                  <th>Contact Person</th>
+                  <th>Phone</th>
+                  <th>Payment Term</th>
+                  <th>Currency</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="clientTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card hidden" id="clientDetailCard">
+          <div class="card-head">
+            <div>
+              <div class="card-title" id="detailTitle">
+                Client Details
+              </div>
+              <div class="card-sub">
+                <span class="badge blue" id="detailIdBadge">CLI-0000</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn ghost"
+              onclick="closeClientDetail()"
+            >
+              ← Back to All Clients
+            </button>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>Client Information</span>
+            </div>
+
+            <div class="form-grid four">
+              <div class="field">
+                <label>Client ID</label>
+                <input id="dClientId" disabled>
+              </div>
+
+              <div class="field">
+                <label>Client Name *</label>
+                <input id="dClientName">
+              </div>
+
+              <div class="field">
+                <label>Client Code *</label>
+                <input id="dClientCode">
+              </div>
+
+              <div class="field">
+                <label>Contact Person</label>
+                <input id="dContactPerson">
+              </div>
+
+              <div class="field">
+                <label>Phone Number</label>
+                <input id="dPhoneNumber">
+              </div>
+
+              <div class="field">
+                <label>Tax / VAT No.</label>
+                <input id="dTaxVatNo">
+              </div>
+
+              <div class="field">
+                <label>Payment Term</label>
+                <input id="dPaymentTerm">
+              </div>
+
+              <div class="field">
+                <label>Currency</label>
+                <select id="dCurrency">
+                  <option value="USD">USD</option>
+                  <option value="KHR">KHR</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Status</label>
+                <select id="dStatus">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div class="field full">
+                <label>Address</label>
+                <textarea id="dAddress"></textarea>
+              </div>
+
+              <div class="field full">
+                <label>Note</label>
+                <textarea id="dNote"></textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button
+                type="button"
+                class="btn primary"
+                id="detailSaveBtn"
+                onclick="saveClientDetail()"
+              >
+                Save Client Information
+              </button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>Client Products & Purchase Prices</span>
+              <span class="badge purple" id="productCount">0 Products</span>
+            </div>
+
+            <div class="info amber" style="margin-bottom:11px">
+              Turn <strong>Linked</strong> ON for products this Client/Supplier sells.
+              Purchase Recorder will only show active linked products. Price history is
+              preserved automatically whenever a Purchase Price changes.
+            </div>
+
+            <div class="toolbar" style="grid-template-columns:minmax(220px,1fr) 170px auto auto">
+              <input
+                class="search search-main"
+                id="productSearch"
+                placeholder="Search product code or name…"
+                oninput="renderProductTable()"
+              >
+
+              <select
+                class="search"
+                id="productLinkedFilter"
+                onchange="renderProductTable()"
+              >
+                <option value="">All products</option>
+                <option value="linked">Linked only</option>
+                <option value="unlinked">Unlinked only</option>
+              </select>
+
+              <button
+                type="button"
+                class="btn ghost"
+                onclick="linkAllVisible(true)"
+              >
+                Link Visible
+              </button>
+
+              <button
+                type="button"
+                class="btn ghost"
+                onclick="linkAllVisible(false)"
+              >
+                Unlink Visible
+              </button>
+            </div>
+
+            <div class="table-wrap">
+              <table class="product-table">
+                <thead>
+                  <tr>
+                    <th>Linked</th>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Purchase Price</th>
+                    <th>Currency</th>
+                    <th>Price Type</th>
+                  </tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="actions">
+              <button
+                type="button"
+                class="btn primary"
+                id="productSaveBtn"
+                onclick="saveClientProducts()"
+              >
+                Save Client Products & Prices
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbzIjs-cNehMxWTZs3ZPAosseGUu1nqACTPo3S4-onLLEYnEgqP6AUK7p3jwb6MaFr7H0w/exec";
+
+const CACHE_KEY="BB_CLIENTS_EDITOR_CACHE_V1";
+const DETAIL_CACHE_PREFIX="BB_CLIENTS_EDITOR_DETAIL_V1_";
+const CACHE_MAX_AGE=24*60*60*1000;
+const DETAIL_CACHE_MAX_AGE=6*60*60*1000;
+const SMART_SYNC_MS=30000;
+const REQUEST_TIMEOUT_MS=20000;
+
+const state={
+  clients:[],
+  products:[],
+  selected:null,
+  catalog:[],
+  dirty:new Set(),
+  revision:"0",
+  cacheReady:false,
+  liveLoaded:false,
+  syncTimer:null,
+  syncBusy:false
+};
+
+const $=id=>document.getElementById(id);
+
+const pageInfo={
+  add:[
+    "Add Client",
+    "Create a Purchase Client / Supplier."
+  ],
+  details:[
+    "All Clients Details",
+    "Edit Client information, Products and Purchase Prices."
+  ]
+};
+
+function esc(value){
+  return String(value??"").replace(
+    /[&<>"']/g,
+    ch=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[ch])
+  );
+}
+
+function escJs(value){
+  return String(value??"")
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'");
+}
+
+function clean(value){
+  return String(value??"").trim();
+}
+
+function num(value){
+  const number=Number(value);
+  return Number.isFinite(number)?number:0;
+}
+
+function money(value,currency="USD"){
+  const number=num(value);
+  return currency==="KHR"
+    ?number.toLocaleString()+" ៛"
+    :"$"+number.toFixed(2);
+}
+
+function showLoading(show,text){
+  $("loading").classList.toggle("hidden",!show);
+  if(text)$("loadingText").textContent=text;
+}
+
+function setConnection(text,type=""){
+  const box=$("connection");
+  box.textContent=text;
+  box.className="connection"+(type?" "+type:"");
+}
+
+function toast(message,error=false){
+  const box=$("toast");
+  box.textContent=message;
+  box.className="toast show"+(error?" error":"");
+
+  clearTimeout(toast.timer);
+
+  toast.timer=setTimeout(
+    ()=>box.className="toast",
+    4000
+  );
+}
+
+function shellParams(){
+  return new URLSearchParams(location.search);
+}
+
+function isEmbeddedWorkspace(){
+  const params=shellParams();
+
+  return (
+    params.get("embed")==="1" ||
+    Boolean(params.get("shellModule"))
+  );
+}
+
+function resolveInitialPage(){
+  const params=shellParams();
+
+  const requested=clean(params.get("view"))
+    .toLowerCase();
+
+  if(["add","details"].includes(requested)){
+    return requested;
+  }
+
+  const shellModule=clean(
+    params.get("shellModule")
+  ).toLowerCase();
+
+  if(shellModule==="clients-add"){
+    return "add";
+  }
+
+  if(
+    shellModule==="clients-details" ||
+    shellModule==="clients-editor"
+  ){
+    return "details";
+  }
+
+  return "add";
+}
+
+function applyWorkspaceMode(){
+  document.body.classList.toggle(
+    "shell-embedded",
+    isEmbeddedWorkspace()
+  );
+}
+
+function storageGet(key){
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return null;
+    return JSON.parse(raw);
+  }catch(error){
+    return null;
+  }
+}
+
+function storageSet(key,value){
+  try{
+    localStorage.setItem(
+      key,
+      JSON.stringify(value)
+    );
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function storageRemove(key){
+  try{
+    localStorage.removeItem(key);
+  }catch(error){}
+}
+
+function detailCacheKey(clientId){
+  return DETAIL_CACHE_PREFIX+
+    clean(clientId);
+}
+
+function saveMainCache(){
+  storageSet(CACHE_KEY,{
+    savedAt:Date.now(),
+    revision:state.revision||"0",
+    clients:state.clients,
+    products:state.products
+  });
+}
+
+function loadMainCache(){
+  const cached=storageGet(CACHE_KEY);
+
+  if(
+    !cached ||
+    !Array.isArray(cached.clients)
+  ){
+    return false;
+  }
+
+  if(
+    Date.now()-
+      Number(cached.savedAt||0) >
+      CACHE_MAX_AGE
+  ){
+    storageRemove(CACHE_KEY);
+    return false;
+  }
+
+  state.clients=cached.clients||[];
+  state.products=cached.products||[];
+  state.revision=String(
+    cached.revision||"0"
+  );
+  state.cacheReady=true;
+
+  renderAllCore();
+  setConnection("Cached · syncing…");
+  showLoading(false);
+
+  return true;
+}
+
+function saveDetailCache(clientId){
+  if(!clientId)return;
+
+  storageSet(
+    detailCacheKey(clientId),
+    {
+      savedAt:Date.now(),
+      revision:state.revision||"0",
+      client:state.selected,
+      products:state.catalog
+    }
+  );
+}
+
+function loadDetailCache(clientId){
+  const cached=storageGet(
+    detailCacheKey(clientId)
+  );
+
+  if(
+    !cached ||
+    !cached.client ||
+    !Array.isArray(cached.products)
+  ){
+    return null;
+  }
+
+  if(
+    Date.now()-
+      Number(cached.savedAt||0) >
+      DETAIL_CACHE_MAX_AGE
+  ){
+    storageRemove(
+      detailCacheKey(clientId)
+    );
+    return null;
+  }
+
+  return cached;
+}
+
+async function fetchWithTimeout(
+  url,
+  options={}
+){
+  const controller=new AbortController();
+
+  const timer=setTimeout(
+    ()=>controller.abort(),
+    REQUEST_TIMEOUT_MS
+  );
+
+  try{
+    return await fetch(
+      url,
+      {
+        ...options,
+        signal:controller.signal,
+        redirect:"follow",
+        cache:"no-store"
+      }
+    );
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+function apiGetJsonp(action,params={}){
+  return new Promise(
+    (resolve,reject)=>{
+      const callback=
+        "bbClientsEditorJsonp_"+
+        Date.now()+"_"+
+        Math.random()
+          .toString(36)
+          .slice(2);
+
+      const url=new URL(API_URL);
+
+      url.searchParams.set(
+        "action",
+        action
+      );
+
+      url.searchParams.set(
+        "callback",
+        callback
+      );
+
+      Object.entries(params).forEach(
+        ([key,value])=>{
+          if(
+            value!==undefined &&
+            value!==null &&
+            value!==""
+          ){
+            url.searchParams.set(
+              key,
+              value
+            );
+          }
+        }
+      );
+
+      const script=
+        document.createElement("script");
+
+      const timer=setTimeout(
+        ()=>{
+          cleanup();
+          reject(
+            new Error(
+              "Database request timed out."
+            )
+          );
+        },
+        REQUEST_TIMEOUT_MS
+      );
+
+      function cleanup(){
+        clearTimeout(timer);
+
+        try{
+          delete window[callback];
+        }catch(error){}
+
+        script.remove();
+      }
+
+      window[callback]=data=>{
+        cleanup();
+
+        if(
+          data &&
+          data.success===false
+        ){
+          reject(
+            new Error(
+              data.error ||
+              "Database request failed."
+            )
+          );
+          return;
+        }
+
+        resolve(data);
+      };
+
+      script.onerror=()=>{
+        cleanup();
+        reject(
+          new Error(
+            "Database connection failed."
+          )
+        );
+      };
+
+      script.src=url.toString();
+      document.head.appendChild(script);
+    }
+  );
+}
+
+async function apiGet(
+  action,
+  params={}
+){
+  const url=new URL(API_URL);
+
+  url.searchParams.set(
+    "action",
+    action
+  );
+
+  Object.entries(params).forEach(
+    ([key,value])=>{
+      if(
+        value!==undefined &&
+        value!==null &&
+        value!==""
+      ){
+        url.searchParams.set(
+          key,
+          value
+        );
+      }
+    }
+  );
+
+  try{
+    const response=
+      await fetchWithTimeout(
+        url.toString()
+      );
+
+    if(!response.ok){
+      throw new Error(
+        "Database request failed ("+
+        response.status+
+        ")."
+      );
+    }
+
+    const data=await response.json();
+
+    if(
+      data &&
+      data.success===false
+    ){
+      throw new Error(
+        data.error ||
+        "Database request failed."
+      );
+    }
+
+    return data;
+
+  }catch(fetchError){
+    return await apiGetJsonp(
+      action,
+      params
+    );
+  }
+}
+
+async function apiPost(
+  action,
+  payload={}
+){
+  const response=
+    await fetchWithTimeout(
+      API_URL,
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
+        body:JSON.stringify({
+          action,
+          ...payload
+        })
+      }
+    );
+
+  if(!response.ok){
+    throw new Error(
+      "Database save failed ("+
+      response.status+
+      ")."
+    );
+  }
+
+  const data=await response.json();
+
+  if(
+    data &&
+    data.success===false
+  ){
+    throw new Error(
+      data.error ||
+      "Database request failed."
+    );
+  }
+
+  return data;
+}
+
+document
+  .querySelectorAll(".nav-item")
+  .forEach(button=>
+    button.addEventListener(
+      "click",
+      ()=>openPage(button.dataset.page)
+    )
+  );
+
+function openPage(name){
+  if(!pageInfo[name])name="add";
+
+  document
+    .querySelectorAll(".nav-item")
+    .forEach(button=>
+      button.classList.toggle(
+        "active",
+        button.dataset.page===name
+      )
+    );
+
+  document
+    .querySelectorAll(".page")
+    .forEach(page=>
+      page.classList.remove("active")
+    );
+
+  $("page-"+name)
+    .classList.add("active");
+
+  $("pageTitle").textContent=
+    pageInfo[name][0];
+
+  $("pageSubtitle").textContent=
+    pageInfo[name][1];
+
+  if(!isEmbeddedWorkspace()){
+    const url=new URL(location.href);
+    url.searchParams.set(
+      "view",
+      name
+    );
+
+    history.replaceState(
+      null,
+      "",
+      url.pathname+url.search
+    );
+  }
+}
+
+function renderAllCore(){
+  updateSummaries();
+  renderClientTable();
+}
+
+function updateSummaries(){
+  const active=state.clients.filter(
+    item=>
+      clean(item.status)
+        .toLowerCase()==="active"
+  ).length;
+
+  $("totalClients").textContent=
+    state.clients.length;
+
+  $("activeClients").textContent=
+    active;
+
+  $("inactiveClients").textContent=
+    state.clients.length-active;
+
+  $("masterProducts").textContent=
+    state.products.length;
+}
+
+function applyBootstrap(data){
+  state.clients=
+    Array.isArray(data.clients)
+      ?data.clients
+      :[];
+
+  state.products=
+    Array.isArray(data.products)
+      ?data.products
+      :[];
+
+  state.revision=String(
+    data.revision ||
+    state.revision ||
+    "0"
+  );
+
+  state.liveLoaded=true;
+
+  renderAllCore();
+  saveMainCache();
+
+  setConnection(
+    "Connected · "+
+    (data.version||"Master Database"),
+    "ok"
+  );
+}
+
+async function loadApp(force=false){
+  const hasCache=
+    state.cacheReady ||
+    loadMainCache();
+
+  if(!hasCache){
+    showLoading(
+      true,
+      "Loading Clients Database…"
+    );
+    setConnection("Connecting…");
+  }else if(force){
+    setConnection("Refreshing…");
+  }
+
+  try{
+    const data=await apiGet(
+      "clientEditorBootstrap",
+      force
+        ?{force:"true"}
+        :{}
+    );
+
+    applyBootstrap(data);
+
+  }catch(error){
+    if(hasCache){
+      setConnection(
+        "Offline Cache",
+        "bad"
+      );
+
+      toast(
+        "Live sync failed. Showing saved device data.",
+        true
+      );
+    }else{
+      setConnection(
+        "Connection Error",
+        "bad"
+      );
+
+      toast(
+        error.message,
+        true
+      );
+    }
+  }finally{
+    showLoading(false);
+  }
+}
+
+function updateClientInState(client){
+  if(
+    !client ||
+    !client.clientId
+  ){
+    return;
+  }
+
+  const index=state.clients.findIndex(
+    item=>
+      item.clientId===client.clientId
+  );
+
+  if(index>=0){
+    state.clients[index]={
+      ...state.clients[index],
+      ...client
+    };
+  }else{
+    state.clients.push(client);
+  }
+
+  state.clients.sort(
+    (a,b)=>
+      clean(a.clientName)
+        .localeCompare(
+          clean(b.clientName)
+        )
+  );
+
+  renderAllCore();
+  saveMainCache();
+}
+
+function scheduleSilentRefresh(delay=350){
+  clearTimeout(
+    scheduleSilentRefresh.timer
+  );
+
+  scheduleSilentRefresh.timer=
+    setTimeout(
+      ()=>silentRefresh(),
+      delay
+    );
+}
+
+async function silentRefresh(){
+  if(state.syncBusy)return;
+
+  state.syncBusy=true;
+
+  try{
+    const data=await apiGet(
+      "clientEditorBootstrap"
+    );
+
+    applyBootstrap(data);
+  }catch(error){
+  }finally{
+    state.syncBusy=false;
+  }
+}
+
+async function checkSmartRevision(){
+  if(
+    state.syncBusy ||
+    document.hidden
+  ){
+    return;
+  }
+
+  state.syncBusy=true;
+
+  try{
+    const result=await apiGet(
+      "clientEditorRevision"
+    );
+
+    const revision=String(
+      result.revision||"0"
+    );
+
+    if(
+      state.revision!=="0" &&
+      revision!=="0" &&
+      revision!==state.revision
+    ){
+      const data=await apiGet(
+        "clientEditorBootstrap",
+        {force:"true"}
+      );
+
+      applyBootstrap(data);
+
+      if(
+        state.selected &&
+        state.selected.clientId
+      ){
+        await refreshSelectedClient(
+          state.selected.clientId,
+          false
+        );
+      }
+
+    }else if(
+      state.revision==="0"
+    ){
+      state.revision=revision;
+      saveMainCache();
+    }
+
+  }catch(error){
+  }finally{
+    state.syncBusy=false;
+  }
+}
+
+function startSmartSync(){
+  clearInterval(state.syncTimer);
+
+  state.syncTimer=setInterval(
+    checkSmartRevision,
+    SMART_SYNC_MS
+  );
+}
+
+function addPayload(){
+  return{
+    clientName:
+      $("aClientName").value.trim(),
+    clientCode:
+      $("aClientCode").value.trim(),
+    contactPerson:
+      $("aContactPerson").value.trim(),
+    phoneNumber:
+      $("aPhoneNumber").value.trim(),
+    address:
+      $("aAddress").value.trim(),
+    taxVatNo:
+      $("aTaxVatNo").value.trim(),
+    paymentTerm:
+      $("aPaymentTerm").value.trim(),
+    currency:
+      $("aCurrency").value,
+    status:
+      $("aStatus").value,
+    note:
+      $("aNote").value.trim()
+  };
+}
+
+$("addForm").addEventListener(
+  "submit",
+  async event=>{
+    event.preventDefault();
+
+    const data=addPayload();
+
+    if(
+      !data.clientName ||
+      !data.clientCode
+    ){
+      return toast(
+        "Client Name and Client Code are required.",
+        true
+      );
+    }
+
+    const button=$("addSaveBtn");
+
+    button.disabled=true;
+    button.textContent="Saving…";
+
+    setConnection("Saving client…");
+
+    try{
+      const result=await apiPost(
+        "saveClient",
+        data
+      );
+
+      if(result.revision){
+        state.revision=String(
+          result.revision
+        );
+      }
+
+      updateClientInState(
+        result.client
+      );
+
+      toast(
+        "Client "+
+        result.client.clientId+
+        " created successfully."
+      );
+
+      resetAddForm();
+      openPage("details");
+
+      await openClientDetail(
+        result.client.clientId
+      );
+
+      scheduleSilentRefresh();
+
+    }catch(error){
+      toast(
+        error.message,
+        true
+      );
+
+    }finally{
+      button.disabled=false;
+      button.textContent=
+        "Save New Client";
+
+      if(state.liveLoaded){
+        setConnection(
+          "Connected · V6.5.0",
+          "ok"
+        );
+      }
+    }
+  }
+);
+
+function resetAddForm(){
+  $("addForm").reset();
+  $("aCurrency").value="USD";
+  $("aStatus").value="Active";
+}
+
+function filteredClients(){
+  const query=
+    $("clientSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const currency=
+    $("clientCurrencyFilter").value;
+
+  const status=
+    $("clientStatusFilter").value;
+
+  return state.clients.filter(
+    item=>{
+      const haystack=[
+        item.clientId,
+        item.clientCode,
+        item.clientName,
+        item.contactPerson,
+        item.phoneNumber,
+        item.address
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        (!query||haystack.includes(query)) &&
+        (!currency||item.currency===currency) &&
+        (!status||item.status===status)
+      );
+    }
+  );
+}
+
+function renderClientTable(){
+  const list=filteredClients();
+
+  $("clientTableBody").innerHTML=
+    list.length
+      ?list.map(
+        item=>
+          "<tr>"+
+          "<td><strong>"+
+          esc(item.clientId||"—")+
+          "</strong></td>"+
+          "<td>"+
+          esc(item.clientCode||"—")+
+          "</td>"+
+          "<td>"+
+          esc(item.clientName||"—")+
+          "</td>"+
+          "<td>"+
+          esc(item.contactPerson||"—")+
+          "</td>"+
+          "<td>"+
+          esc(item.phoneNumber||"—")+
+          "</td>"+
+          "<td>"+
+          esc(item.paymentTerm||"—")+
+          "</td>"+
+          "<td><span class='badge blue'>"+
+          esc(item.currency||"USD")+
+          "</span></td>"+
+          "<td>"+
+          (
+            clean(item.status)
+              .toLowerCase()==="active"
+              ?"<span class='badge green'>Active</span>"
+              :"<span class='badge red'>Inactive</span>"
+          )+
+          "</td>"+
+          "<td><button class='row-btn' onclick=\"openClientDetail('"+
+          escJs(item.clientId)+
+          "')\">Manage</button></td>"+
+          "</tr>"
+      ).join("")
+      :"<tr><td colspan='9' class='empty'>No clients found.</td></tr>";
+}
+
+function clearFilters(){
+  $("clientSearch").value="";
+  $("clientCurrencyFilter").value="";
+  $("clientStatusFilter").value="";
+  renderClientTable();
+}
+
+function fillClientDetail(client){
+  state.selected={...client};
+
+  $("clientListCard")
+    .classList.add("hidden");
+
+  $("clientDetailCard")
+    .classList.remove("hidden");
+
+  $("detailTitle").textContent=
+    client.clientName||
+    "Client Details";
+
+  $("detailIdBadge").textContent=
+    client.clientId;
+
+  $("dClientId").value=
+    client.clientId||"";
+
+  $("dClientName").value=
+    client.clientName||"";
+
+  $("dClientCode").value=
+    client.clientCode||"";
+
+  $("dContactPerson").value=
+    client.contactPerson||"";
+
+  $("dPhoneNumber").value=
+    client.phoneNumber||"";
+
+  $("dTaxVatNo").value=
+    client.taxVatNo||"";
+
+  $("dPaymentTerm").value=
+    client.paymentTerm||"";
+
+  $("dCurrency").value=
+    client.currency||"USD";
+
+  $("dStatus").value=
+    client.status||"Active";
+
+  $("dAddress").value=
+    client.address||"";
+
+  $("dNote").value=
+    client.note||"";
+}
+
+async function openClientDetail(clientId){
+  const cached=loadDetailCache(clientId);
+
+  if(cached){
+    state.selected=cached.client;
+    state.catalog=cached.products;
+    state.dirty.clear();
+
+    fillClientDetail(
+      cached.client
+    );
+
+    renderProductTable();
+  }else{
+    const basic=state.clients.find(
+      item=>
+        item.clientId===clientId
+    );
+
+    if(basic){
+      fillClientDetail(basic);
+    }
+
+    state.catalog=[];
+    state.dirty.clear();
+    renderProductTable();
+
+    showLoading(
+      true,
+      "Loading Client Products & Prices…"
+    );
+  }
+
+  try{
+    await refreshSelectedClient(
+      clientId,
+      true
+    );
+
+  }catch(error){
+    if(!cached){
+      toast(
+        error.message,
+        true
+      );
+    }else{
+      toast(
+        "Showing saved Client details. Live sync failed.",
+        true
+      );
+    }
+
+  }finally{
+    showLoading(false);
+  }
+}
+
+async function refreshSelectedClient(
+  clientId,
+  render=true
+){
+  const result=await apiGet(
+    "clientEditorDetail",
+    {clientId}
+  );
+
+  state.selected=result.client;
+  state.catalog=
+    Array.isArray(result.products)
+      ?result.products
+      :[];
+
+  state.dirty.clear();
+
+  if(result.revision){
+    state.revision=String(
+      result.revision
+    );
+  }
+
+  if(render){
+    fillClientDetail(
+      result.client
+    );
+
+    renderProductTable();
+  }
+
+  saveDetailCache(clientId);
+  saveMainCache();
+
+  return result;
+}
+
+function closeClientDetail(){
+  $("clientDetailCard")
+    .classList.add("hidden");
+
+  $("clientListCard")
+    .classList.remove("hidden");
+
+  state.selected=null;
+  state.catalog=[];
+  state.dirty.clear();
+}
+
+function detailPayload(){
+  return{
+    clientId:
+      $("dClientId").value,
+    clientName:
+      $("dClientName").value.trim(),
+    clientCode:
+      $("dClientCode").value.trim(),
+    contactPerson:
+      $("dContactPerson").value.trim(),
+    phoneNumber:
+      $("dPhoneNumber").value.trim(),
+    address:
+      $("dAddress").value.trim(),
+    taxVatNo:
+      $("dTaxVatNo").value.trim(),
+    paymentTerm:
+      $("dPaymentTerm").value.trim(),
+    currency:
+      $("dCurrency").value,
+    status:
+      $("dStatus").value,
+    note:
+      $("dNote").value.trim()
+  };
+}
+
+async function saveClientDetail(){
+  const data=detailPayload();
+
+  if(
+    !data.clientName ||
+    !data.clientCode
+  ){
+    return toast(
+      "Client Name and Client Code are required.",
+      true
+    );
+  }
+
+  const button=$("detailSaveBtn");
+
+  button.disabled=true;
+  button.textContent="Saving…";
+
+  setConnection("Saving client…");
+
+  try{
+    const result=await apiPost(
+      "saveClient",
+      data
+    );
+
+    if(result.revision){
+      state.revision=String(
+        result.revision
+      );
+    }
+
+    updateClientInState(
+      result.client
+    );
+
+    fillClientDetail(
+      result.client
+    );
+
+    state.selected=result.client;
+    saveDetailCache(
+      result.client.clientId
+    );
+
+    toast(
+      "Client information updated."
+    );
+
+    setConnection(
+      "Connected · V6.5.0",
+      "ok"
+    );
+
+    scheduleSilentRefresh();
+
+  }catch(error){
+    toast(
+      error.message,
+      true
+    );
+
+  }finally{
+    button.disabled=false;
+    button.textContent=
+      "Save Client Information";
+  }
+}
+
+function visibleCatalogIndexes(){
+  const query=
+    $("productSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const linkedFilter=
+    $("productLinkedFilter").value;
+
+  const indexes=[];
+
+  state.catalog.forEach(
+    (item,index)=>{
+      const haystack=[
+        item.productCode,
+        item.productName,
+        item.unit
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const matchesQuery=
+        !query ||
+        haystack.includes(query);
+
+      const matchesLinked=
+        !linkedFilter ||
+        (
+          linkedFilter==="linked"
+            ?item.linked
+            :!item.linked
+        );
+
+      if(
+        matchesQuery &&
+        matchesLinked
+      ){
+        indexes.push(index);
+      }
+    }
+  );
+
+  return indexes;
+}
+
+function renderProductTable(){
+  $("productCount").textContent=
+    state.catalog.length+
+    " Products";
+
+  const indexes=
+    visibleCatalogIndexes();
+
+  $("productTableBody").innerHTML=
+    indexes.length
+      ?indexes.map(
+        index=>{
+          const item=
+            state.catalog[index];
+
+          const rowClass=[
+            item.linked
+              ?""
+              :"unlinked",
+            state.dirty.has(
+              item.productCode
+            )
+              ?"dirty"
+              :""
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          return (
+            "<tr class='"+rowClass+"' id='productRow"+index+"'>"+
+            "<td>"+
+              "<label class='switch'>"+
+                "<input type='checkbox' "+
+                (item.linked?"checked":"")+
+                " onchange='productLinkedChanged("+index+",this.checked)'>"+
+                "<span>"+
+                (item.linked?"Yes":"No")+
+                "</span>"+
+              "</label>"+
+            "</td>"+
+            "<td><strong>"+
+              esc(item.productCode)+
+            "</strong></td>"+
+            "<td>"+
+              esc(item.productName)+
+            "</td>"+
+            "<td>"+
+              esc(item.unit||"—")+
+            "</td>"+
+            "<td>"+
+              "<input type='number' min='0' step='0.0001' value='"+
+              num(item.purchasePrice)+
+              "' "+
+              (item.linked?"":"disabled")+
+              " oninput='productPriceChanged("+index+",this.value)'>"+
+            "</td>"+
+            "<td>"+
+              "<select "+
+              (item.linked?"":"disabled")+
+              " onchange='productCurrencyChanged("+index+",this.value)'>"+
+                "<option value='USD' "+
+                (item.currency==="USD"?"selected":"")+
+                ">USD</option>"+
+                "<option value='KHR' "+
+                (item.currency==="KHR"?"selected":"")+
+                ">KHR</option>"+
+              "</select>"+
+            "</td>"+
+            "<td>"+
+              (
+                item.linked
+                  ?"<span class='badge green'>ACTIVE LINK</span>"
+                  :"<span class='badge red'>NOT LINKED</span>"
+              )+
+            "</td>"+
+            "</tr>"
+          );
+        }
+      ).join("")
+      :"<tr><td colspan='7' class='empty'>No products found.</td></tr>";
+}
+
+function markProductDirty(index){
+  const item=state.catalog[index];
+
+  if(!item)return;
+
+  state.dirty.add(
+    item.productCode
+  );
+}
+
+function productLinkedChanged(
+  index,
+  linked
+){
+  const item=state.catalog[index];
+  if(!item)return;
+
+  item.linked=linked;
+
+  if(
+    linked &&
+    !item.currency
+  ){
+    item.currency=
+      state.selected?.currency ||
+      "USD";
+  }
+
+  markProductDirty(index);
+  renderProductTable();
+}
+
+function productPriceChanged(
+  index,
+  value
+){
+  const item=state.catalog[index];
+  if(!item)return;
+
+  item.purchasePrice=num(value);
+  markProductDirty(index);
+
+  const row=$("productRow"+index);
+  if(row)row.classList.add("dirty");
+}
+
+function productCurrencyChanged(
+  index,
+  value
+){
+  const item=state.catalog[index];
+  if(!item)return;
+
+  item.currency=value;
+  markProductDirty(index);
+
+  const row=$("productRow"+index);
+  if(row)row.classList.add("dirty");
+}
+
+function linkAllVisible(linked){
+  visibleCatalogIndexes().forEach(
+    index=>{
+      const item=state.catalog[index];
+
+      if(item.linked!==linked){
+        item.linked=linked;
+
+        if(
+          linked &&
+          !item.currency
+        ){
+          item.currency=
+            state.selected?.currency ||
+            "USD";
+        }
+
+        markProductDirty(index);
+      }
+    }
+  );
+
+  renderProductTable();
+}
+
+async function saveClientProducts(){
+  if(!state.selected)return;
+
+  if(!state.dirty.size){
+    return toast(
+      "No Client Product or Price changes to save."
+    );
+  }
+
+  const button=$("productSaveBtn");
+
+  button.disabled=true;
+  button.textContent="Saving…";
+
+  const products=state.catalog
+    .filter(item=>
+      state.dirty.has(
+        item.productCode
+      )
+    )
+    .map(item=>({
+      productCode:
+        item.productCode,
+      linked:
+        item.linked,
+      purchasePrice:
+        num(item.purchasePrice),
+      currency:
+        item.currency ||
+        state.selected.currency ||
+        "USD",
+      productNote:
+        item.productNote||"",
+      priceNote:
+        item.priceNote||""
+    }));
+
+  try{
+    const result=await apiPost(
+      "saveClientCatalog",
+      {
+        clientId:
+          state.selected.clientId,
+        products
+      }
+    );
+
+    if(result.revision){
+      state.revision=String(
+        result.revision
+      );
+    }
+
+    if(
+      result.detail &&
+      result.detail.client
+    ){
+      state.selected=
+        result.detail.client;
+
+      state.catalog=
+        result.detail.products||[];
+    }
+
+    state.dirty.clear();
+
+    fillClientDetail(
+      state.selected
+    );
+
+    renderProductTable();
+
+    saveDetailCache(
+      state.selected.clientId
+    );
+
+    saveMainCache();
+
+    toast(
+      result.savedCount+
+      " product changes saved."
+    );
+
+    scheduleSilentRefresh();
+
+  }catch(error){
+    toast(
+      error.message,
+      true
+    );
+
+  }finally{
+    button.disabled=false;
+    button.textContent=
+      "Save Client Products & Prices";
+  }
+}
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+    if(!document.hidden){
+      checkSmartRevision();
+    }
+  }
+);
+
+window.addEventListener(
+  "storage",
+  event=>{
+    if(
+      event.key!==CACHE_KEY ||
+      !event.newValue
+    ){
+      return;
+    }
+
+    try{
+      const cached=
+        JSON.parse(event.newValue);
+
+      if(
+        !Array.isArray(
+          cached.clients
+        )
+      ){
+        return;
+      }
+
+      state.clients=
+        cached.clients||[];
+
+      state.products=
+        cached.products||[];
+
+      state.revision=String(
+        cached.revision ||
+        state.revision ||
+        "0"
+      );
+
+      renderAllCore();
+
+    }catch(error){}
+  }
+);
+
+// FAST START
+applyWorkspaceMode();
+openPage(resolveInitialPage());
+loadMainCache();
+loadApp(false);
+startSmartSync();
+</script>
+</body>
+</html>
